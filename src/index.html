@@ -1,0 +1,118 @@
+<html>
+<head>
+<title></title>
+<meta name="viewport" content="width=device-width, minimum-scale=1.0" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+<link type="text/css" rel="stylesheet" href="../public/css/canvas.css" />
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+
+<script src="../public/lib/jquery.js"></script>
+<script src="../public/lib/jquery-ui.js"></script>
+<script src="../public/lib/draw2d.js"></script>
+<script src="../public/lib/myConnection.js"></script>
+
+</head>
+
+<body>
+<div class="container-fluid">
+    <br>
+    <button class="btn btn-primary" id="addRect">Rectangle</button>
+    <button class="btn btn-primary" id="addDiamond">Diamond</button>
+    <button class="btn btn-primary" id="addStartState">State State</button>
+    <button class="btn btn-primary" id="addEndState">End State</button>
+    <!-- <button class="btn btn-primary" id="save">Save diagram</button> -->
+    <br><br>
+    <div id="canvas1" style="width:1000px; height:500px;"></div> <br>
+    <!-- <div id="canvas2" style="width:1000px; height:500px;"></div> -->
+    <!-- <img id="preview"> -->
+</div>
+
+</body>
+</html>
+
+<script type="text/javascript">
+
+    $(window).load(function () {
+        
+        var canvas1 = null;
+        canvas1 = new draw2d.Canvas("canvas1");
+        
+        canvas1.paper.canvas.style.position="relative";
+        canvas1.installEditPolicy(new draw2d.policy.canvas.FadeoutDecorationPolicy());
+        canvas1.installEditPolicy(  new draw2d.policy.connection.DragConnectionCreatePolicy({
+            createConnection: function(){
+                return new MyConnection();
+            }
+        }));
+
+        $('#addRect').click( function () {
+            rect = new draw2d.shape.basic.Rectangle({width: 100, height: 60, x: 50, y: 50, bgColor: "#00A3F6"})
+            label = new draw2d.shape.basic.Label({text:"Label"})
+            rect.add( label, new draw2d.layout.locator.CenterLocator()); 
+
+            label.installEditor(new draw2d.ui.LabelInplaceEditor({
+                // called after the value has been set to the LabelFigure
+                onCommit: $.proxy(function(value){
+                },this),
+                // called if the user abort the operation
+                onCancel: function(){
+                }
+            }));
+
+            var topLocator  = new draw2d.layout.locator.TopLocator();
+            var bottomLocator = new draw2d.layout.locator.BottomLocator();
+            var leftLocator = new draw2d.layout.locator.LeftLocator();
+            var rightLocator = new draw2d.layout.locator.RightLocator();
+            rect.createPort("hybrid",topLocator);
+            rect.createPort("hybrid",bottomLocator);
+            rect.createPort("hybrid",leftLocator);
+            rect.createPort("hybrid",rightLocator);
+
+            canvas1.add(rect);
+        })
+        $('#addDiamond').click( function () {
+            diamond = new draw2d.shape.basic.Diamond({x:10,y:10, width:100, height:100, keepAspectRatio : true})
+            
+            label = new draw2d.shape.basic.Label({text:"Label"})
+            diamond.add( label, new draw2d.layout.locator.CenterLocator()); 
+
+            label.installEditor(new draw2d.ui.LabelInplaceEditor());
+
+            var topLocator  = new draw2d.layout.locator.TopLocator();
+            var bottomLocator = new draw2d.layout.locator.BottomLocator();
+            var leftLocator = new draw2d.layout.locator.LeftLocator();
+            var rightLocator = new draw2d.layout.locator.RightLocator();
+            diamond.createPort("hybrid",topLocator);
+            diamond.createPort("hybrid",bottomLocator);
+            diamond.createPort("hybrid",leftLocator);
+            diamond.createPort("hybrid",rightLocator);
+
+            canvas1.add(diamond);
+        })
+
+        $('#addStartState').click( function () {
+            var start = new draw2d.shape.state.Start();
+            canvas1.add(start);
+        })
+
+        $('#addEndState').click( function () {
+            var end = new draw2d.shape.state.End();
+            canvas1.add(end);
+        })
+
+        $('#save').click( function () {
+            var writer = new draw2d.io.png.Writer();
+            writer.marshal(canvas1, function(png){
+                $("#preview").attr("src",png);
+            });
+
+        })
+
+        canvas1.on("dblclick", function(emitter, event){
+            console.log("Figure selected: ");
+        });
+    });
+
+</script>
